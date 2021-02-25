@@ -1,37 +1,41 @@
-## Elite BOT
-Esse é o repositório do bot Segurança, criado para o servidor Elite dos Desenvolvedores no discord.
+# Welcome To EconomyBot <img src="https://raw.githubusercontent.com/MartinHeinz/MartinHeinz/master/wave.gif" width="30px">
+## This EconomyBot was written by 0_0#6666
+### Language : JavaScript/NodeJS (Core Lang : EN)
+##### Library : Discord.js
+###### Framework used : quick.eco by Snowflake Development
 
-## Instalação
-Após ter clonado o repositorio e extraido todos arquivos. tenha certeza que possui o [npm](https://www.npmjs.com/) e o [node.js 8.0.0](https://nodejs.org/en/) ou mais recente. caso estiver com tudo pronto então execute o seguinte comando no diretorio dos arquivos.
+##### IN BOTCONFIG.JSON DO NOT CHANGE ANY VARIABLE THE CountChannel var is for if you want to set a channel to count for users if not just leave it blank AND EVERYTHING ELSE IS SELF EPLAINATORY JUST CHANGE THE VALUES INSIDE "" TO MAKE YOUR BOT FUNCTION PROPERLY!
+# Links
+- 🔗 [Youtube Channel](https://www.youtube.com/channel/UCF9E-xef9jL9QgziZRDHKKQ)
+- [Support Server Link](https://discord.gg/REAW5VM)
+# Copyright 
+Copyright 2020 © All RIghts are Reserved | If you are using any part of code please give me credits for the same. Thanks
 
-```$ npm install```
+# License
+**nginx 2021 all rights reserved**
 
-Se tudo estiver certo, crie um arquivo com o nome de **config.json** seguindo o exemplo do **config-example.json** na pasta comandos
+# Features
+- Shop
+- Customisable Daily, weekly , search , crime and beg commands (earning)
+- Balance
+- Leaderboard
+- CodeFactor : Easily usable 
+## Contribute 
+### Feel free to contribute to the repository by forking it and submitting a pull request we would love to have you as a contributor! You mst read through the nginx code of conduct and the (Included) license carefully before submitting a pull request.
+#### Node Version Requirement
+``12.x or higher``
 
-| Opção        | Descrição                        | Obrigatório? |
-| ------------ | -------------------------------- | ------------ |
-| PREFIX       | Prefixo para os comandos         | sim          |
-| TOKEN        | Token de autenticação do bot     | sim          |
-| DB           | Conexão com a DB do Mongo        | sim          |
-|GOOGLE_API_KEY| Key da API do Youtube            | sim          |
+**NOTE FOR GLITCH HOSTERS 
+`` THIS BOT DOES NOT DIE IT SENDS A HEARTBEAT (PING) EVERY 5 MINS TO THE GLITCH PROJECT SO THAT YOUR PROJECT STAYS ALIVE IF IT DOES NOT WORK FOR YOU THEN 
+DM ME FOR A SCRIPT THAT PREVENTS THIS JOIN THE SERVER ABOVE AND DM  ME @0_0#6666 THIS MIGHT GET YOUR PROJECT SUSPENDED BUT YOU CAN ALWAYS
+MAKE A NEW ONE USING MY TUTORIAL :D``**
+``IT WORKS ON REPL.IT PRETTY FINE ITS BEEN TESTED ALREADY``
 
-*Caso você vá testar o BOT em outro servidor é necessário alterar o ID de cada sala no config.json*
+# Host On Repl.it
+[![Use on Repl.it](https://repl.it/badge/github/ZeroDiscord/EconomyBot)](https://repl.it/github/ZeroDiscord/EconomyBot)
+# Host On Glitch 
+[Click Here to Host On Glitch](https://glitch.com/edit/#!/import/git?url=https://github.com/ZeroDiscord/EconomyBot/)
 
-Depois de tudo configurado é só usar o comando
-
-```
-$ node app.js
-```
-
-Caso apareça a lista de comandos sendo carregada e após isso a seguinte mensagem, o BOT já estara funcionando.
-
-```
-[CONECTADO] A aplicação foi conectada e estabelecida com sucesso!
-O Bot foi iniciado completamente com x usuarios em x servidores
-```
-
-## Contribuições
-Serão aceitas pull requests com códigos limpos e não maliciosos, sempre tendo em mente a melhoria do BOT para o servidor.
-
-## Ajuda
-Tem alguma dúvida? Entre em nosso discord e converse com a gente: https://discord.gg/cys2Y8
+# Dependencies 
+- *Discord.js v12*
+- *quick.eco (has a Dev dependency of quick.db and better-sqlite3*)
