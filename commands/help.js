@@ -1,23 +1,24 @@
-const { MessageEmbed } = require("discord.js");
+const Discord = require('discord.js')
+const db = require('quick.db')
 
-exports.execute = async (client, message, args) => {
-    const embed = new MessageEmbed()
-        .setAuthor("Commands")
-        .setTitle("Make Sure To Check Out This Channel For More Such Bots")
-        .setURL("https://www.youtube.com/channel/UCF9E-xef9jL9QgziZRDHKKQ")
-        .setDescription(`Total Commands: ${client.commands.size}`)
-        .setColor("BLURPLE")
-        .setTimestamp()
-        .setThumbnail(client.user.displayAvatarURL)
-        .setFooter(message.author.tag, message.author.displayAvatarURL);
-    client.commands.forEach(cmd => {
-        embed.addField(`${cmd.help.name}`, `Aliases: ${cmd.help.aliases.join(", ") || "None"}\nUsage: \`${client.prefix}${cmd.help.usage}\``, true);
-    });
-    return message.channel.send(embed);
+module.exports.run = async (bot, message, args) => {
+    if(!message.content.startsWith('m!'))return;  
+
+
+    let embed = new Discord.RichEmbed()
+    .setTitle("Money Man Help Centre [Prefix m!]")
+    .addField("Economy Commands", "`work` `beg` `rob` `pay` `balance` `profile` `withdraw` `deposit` `daily` `weekly` `store` `buy` `sell`")
+    .addField("Gambling Commmands", "`roulette` `slots`")
+    .addField("Economy Extra Commands", "`storeinfo [item]`")
+    .setColor("#FFFFFF")
+    message.channel.send(embed)
+
+
+
+
 }
 
-exports.help = {
-    name: "help",
-    aliases: ["h"],
-    usage: `help`
+module.exports.help = {
+  name:"help",
+  aliases: [""]
 }

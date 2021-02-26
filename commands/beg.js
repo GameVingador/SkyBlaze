@@ -1,19 +1,38 @@
-exports.execute = async (client, message, args) => {
-    let users = [
-        "PewDiePie",
-        "T-Series",
-        "Sans",
-        "Zero"
-    ];
-    let amount = Math.floor(Math.random() * 50) + 10;
-    let beg = client.eco.beg(client.ecoAddUser, amount, { canLose: true });
-    if (beg.onCooldown) return message.reply(`Begon Thot! Come back after ${beg.time.seconds} seconds.`);
-    if (beg.lost) return message.channel.send(`**${users[Math.floor(Math.random() * users.length)]}:** Begon Thot! Try again later.`);
-    else return message.reply(`**${users[Math.floor(Math.random() * users.length)]}** donated you **${beg.amount}** 💸. Now you have **${beg.after}** 💸.`);
+const Discord = require("discord.js");
+const db = require("quick.db");
+const ms = require("parse-ms");
+
+module.exports.run = async (bot, message, args) => {
+  if(!message.content.startsWith('m!'))return;  
+
+  let user = message.author;
+
+  let timeout = 180000;
+  let amount = 5;
+
+  let beg = await db.fetch(`beg_${message.guild.id}_${user.id}`);
+
+  if (beg !== null && timeout - (Date.now() - beg) > 0) {
+    let time = ms(timeout - (Date.now() - beg));
+  
+    let timeEmbed = new Discord.RichEmbed()
+    .setColor("#FFFFFF")
+    .setDescription(`<:Cross:618736602901905418> You've already begged recently\n\nBeg again in ${time.minutes}m ${time.seconds}s `);
+    message.channel.send(timeEmbed)
+  } else {
+    let moneyEmbed = new Discord.RichEmbed()
+  .setColor("#FFFFFF")
+  .setDescription(`<:Check:618736570337591296> You've begged and received ${amount} coins`);
+  message.channel.send(moneyEmbed)
+  db.add(`money_${message.guild.id}_${user.id}`, amount)
+  db.set(`beg_${message.guild.id}_${user.id}`, Date.now())
+
+
+  }
 };
 
-exports.help = {
-    name: "beg",
-    aliases: [],
-    usage: "beg"
+
+module.exports.help = {
+  name:"beg",
+  aliases: [""]
 }
