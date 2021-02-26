@@ -1,61 +1,101 @@
-const botconfig = require("./botconfig.json");
-const Discord = require("discord.js");
-const fs = require("fs");
-const bot = new Discord.Client({disableEveryone: true});
+// Modules //
 
-bot.commands = new Discord.Collection();
-bot.aliases = new Discord.Collection();
+const Discord = require('discord.js')
+const ms = require('ms')
+const fs = require('fs')
+const chalk = require('chalk')
+const db = require('quick.db')
+const nbx = require('noblox.js')
+
+// Miscellaneous //
+
+const {
+    token,
+    PREFIX
+} = require('./config.json')
+const client = new Discord.Client()
+
+const colors = require('./colors.json')
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+
+client.commands = new Discord.Collection()
 
 
-fs.readdir("./commands/", (err, files) => {
+// Bot Code //
 
-  if(err) console.log(err);
-  let jsfile = files.filter(f => f.split(".").pop() === "js");
-  if(jsfile.length <= 0){
-    console.log("Couldn't find commands.");
-    return;
-  }
-  
+for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
+}
 
-  jsfile.forEach((f, i) =>{
-    let props = require(`./commands/${f}`);
-    console.log(`${f} loaded!`);
-    bot.commands.set(props.help.name, props);
-    props.help.aliases.forEach(alias => { 
-      bot.aliases.set(alias, props.help.name);
-  
-  });
+client.once('ready', () => {
+
+    console.log(chalk.bgGreenBright.black("[" + client.user.username + "]"), "Bot Online");
+    client.user.setActivity('@NovaBot help 💖', {
+        type: "PLAYING"
+    });
+
+    async function login() {
+        await nbx.setCookie('')
+    }
+
+    login()
 });
+
+client.on('messageDelete', async message => {
+    db.set(`msg_${message.channel.id}`, message.content)
+    db.set(`author_${message.channel.id}`, message.author.id)
 })
-bot.on("ready", async () => {
-  console.log(`${bot.user.username} is online on ${bot.guilds.size} servers!`);
-  bot.user.setActivity(`In Development`);
-  bot.user.setStatus('online');
 
-  bot.on("message", async message => {
-    if(message.author.bot) return;
-    if(message.channel.type === "dm") return;
-    let prefix = botconfig.prefix
-    let messageArray = message.content.split(" ");
-    let args = message.content.slice(prefix.length).trim().split(/ +/g);
-    let cmd = args.shift().toLowerCase();
-    let commandfile;
+client.on('message', async message => {
 
-    if (bot.commands.has(cmd)) {
-      commandfile = bot.commands.get(cmd);
-  } else if (bot.aliases.has(cmd)) {
-    commandfile = bot.commands.get(bot.aliases.get(cmd));
-  }
-  
-      if (!message.content.startsWith(prefix)) return;
+    const prefixMention = new RegExp(`^<@!?${client.user.id}> `);
+    const prefix = message.content.match(prefixMention) ? message.content.match(prefixMention)[0] : PREFIX;
 
-          
-  try {
-    commandfile.run(bot, message, args);
-  
-  } catch (e) {
-  }}
-  )})
+    let mentionEmbed = new Discord.MessageEmbed()
+        .setTimestamp()
+        .setAuthor(`${message.client.user.username}`, message.client.user.avatarURL())
+        .setDescription("👋 Hello, my prefix is `^`. Use `^help` for all of my commands!")
+        .setColor(colors.orange)
+        .setFooter(message.client.user.username, message.client.user.displayAvatarURL({
+            dynamic: true
+        }))
+
+        
+    if (message.mentions.users.has(message.client.user.id)) message.channel.send(`<@${message.author.id}>`, mentionEmbed)
+
+    if (!message.content.startsWith(prefix)) return;
 
 
-bot.login("Discord Token");
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const commandName = args.shift().toLowerCase();
+
+    let checkingBlacklistedMembers = db.fetch(`blacklistMember_${message.author.id}`)
+    if (checkingBlacklistedMembers === null) {
+        checkingBlacklistedMembers === false
+    }
+
+
+    let blacklistedEmbed = new Discord.MessageEmbed()
+        .setTitle("YOU HAVE BEEN BLACKLISTED")
+        .setColor(colors.red)
+        .setDescription("You have been blacklisted from my commands. If you wish to appeal, please DM <@559191331298213898> for more info.")
+        .setFooter(`${client.user.username}`, client.user.avatarURL())
+
+    if (checkingBlacklistedMembers === true) message.channel.send(blacklistedEmbed)
+
+    const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+    if (!command) return;
+    try {
+        command.execute(message, args, client);
+        console.log(chalk.greenBright('[COMMAND]'), `${message.author.tag} used the command ` + commandName)
+    } catch (error) {
+        console.log(error);
+        message.reply('there was an error trying to execute that command! ```\n' + error + "\n```");
+    }
+});
+
+client.login(token).catch(error => {
+    console.log(chalk.red('[ERROR] ') + error)
+})

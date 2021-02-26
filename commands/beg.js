@@ -1,38 +1,36 @@
-const Discord = require("discord.js");
-const db = require("quick.db");
-const ms = require("parse-ms");
+const Discord = require('discord.js')
+const colors = require('../colors.json')
+const client = require('../index.js')
+const db = require('quick.db')
+const ms = require('ms')
 
-module.exports.run = async (bot, message, args) => {
-  if(!message.content.startsWith('m!'))return;  
+module.exports = {
+    name: 'beg',
+    description: 'Beg and get paid',
+    usage: 'beg',
+    category: 'Economy',
+    guildOnly: true,
+    async execute(message, args){
+        let payment = Math.floor(Math.random() * 501)
 
-  let user = message.author;
+        let timeout = 5 * 60000;
+        let work = await db.fetch(`beg_${message.guild.id}_${message.author.id}`);
 
-  let timeout = 180000;
-  let amount = 5;
+        if(work !== null && timeout - (Date.now() - work) > 0){
+            let time = ms(timeout - (Date.now() - work));
 
-  let beg = await db.fetch(`beg_${message.guild.id}_${user.id}`);
+            return message.channel.send(`Please wait 5 minutes before begging again`)
+        } else {
+            db.add(`money_${message.guild.id}_${message.author.id}`, payment);
+            db.set(`beg_${message.guild.id}_${message.author.id}`, Date.now());
 
-  if (beg !== null && timeout - (Date.now() - beg) > 0) {
-    let time = ms(timeout - (Date.now() - beg));
-  
-    let timeEmbed = new Discord.RichEmbed()
-    .setColor("#FFFFFF")
-    .setDescription(`<:Cross:618736602901905418> You've already begged recently\n\nBeg again in ${time.minutes}m ${time.seconds}s `);
-    message.channel.send(timeEmbed)
-  } else {
-    let moneyEmbed = new Discord.RichEmbed()
-  .setColor("#FFFFFF")
-  .setDescription(`<:Check:618736570337591296> You've begged and received ${amount} coins`);
-  message.channel.send(moneyEmbed)
-  db.add(`money_${message.guild.id}_${user.id}`, amount)
-  db.set(`beg_${message.guild.id}_${user.id}`, Date.now())
+            let workEmbed = new Discord.MessageEmbed()
+                .setAuthor(message.author.tag, message.author.avatarURL({ dynamic: true }))
+                .setDescription("**Bill Gates:** ugh, fine here's <a:coin1:762153326430912532>" + payment + '!')
+                .setTimestamp()
+                .setColor("GREEN")
+            message.channel.send(workEmbed)
 
-
-  }
-};
-
-
-module.exports.help = {
-  name:"beg",
-  aliases: [""]
+        }
+    }
 }

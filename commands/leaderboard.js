@@ -1,83 +1,55 @@
 const Discord = require('discord.js')
+const colors = require('../colors.json')
+const client = require('../index.js')
 const db = require('quick.db')
 
-module.exports.run = async (bot, message, args) => {
-    if(!message.content.startsWith('m!'))return;  
+module.exports = {
+    name: 'leaderboard',
+    description: 'Sends the leaderboard for economy',
+    usage: 'leaderboard <-bank | -cash>',
+    aliases: ['lb', 'top'],
+    category: 'Economy',
+    guildOnly: true,
+    async execute(message, args) {
+        let cashInHand = db.all().filter(data => data.ID.startsWith(`money_${message.guild.id}`)).sort((a, b) => b.data - a.data)
+        let moneyInBank = db.all().filter(data => data.ID.startsWith(`bank`)).sort((a, b) => b.data - a.data)
 
-    const embed = new Discord.RichEmbed()
-    .setDescription(`**Input a Leaderboard Option**\n\nCoin Leaderboard: m!leaderboard coins\nFresh Nikes Leaderboard: m!leaderboard nikes\nCar Leaderboard: m!leaderboard car\nMansion Leaderboard: m!leaderboard mansion`)
-    .setColor("#FFFFFF")
+        cashInHand.length = 10;
+        moneyInBank.length = 10
+        var finalLb = "";
+        if (!args.length) {
+            let embed = new Discord.MessageEmbed()
+                .setAuthor(message.author.tag, message.author.displayAvatarURL({
+                    dynamic: true
+                })).setDescription('<:xmark:761665920459341894> Invalid `[-cash | -bank]` arguments given.')
+                .addField('Usage:', '`leaderboard <-cash | -bank>`')
+                .setColor(colors.red)
+                .setFooter(message.client.user.username, message.client.user.displayAvatarURL())
+                message.channel.send(embed)
 
+        } else if (args[0] === "-cash") {
+            for (var i in cashInHand) {
+                finalLb += `**${cashInHand.indexOf(cashInHand[i])+1}. <@${message.client.users.cache.get(cashInHand[i].ID.split('_')[2]) ? message.client.users.cache.get(cashInHand[i].ID.split('_')[2]).id : "Unknown User#0000"}>** • <a:coin1:762153326430912532>  ${cashInHand[i].data}\n`;
+            }
+            const embed = new Discord.MessageEmbed()
+                .setAuthor(`${message.guild.name}'s Cash Leaderboard`, 'https://media.discordapp.net/attachments/506838906872922145/506899959816126493/h5D6Ei0.png')
+                .setColor("#7289da")
+                .setDescription(finalLb)
+                .setFooter(message.client.user.username, message.client.user.displayAvatarURL())
+                .setTimestamp()
+            message.channel.send(embed);
+        } else if (args[0] === "-bank") {
+            for (var i in moneyInBank) {
+                finalLb += `**${moneyInBank.indexOf(moneyInBank[i])+1}. <@${message.client.users.cache.get(moneyInBank[i].ID.split('_')[2]) ? message.client.users.cache.get(moneyInBank[i].ID.split('_')[2]).id : "Unknown User#0000"}>** • <a:coin1:762153326430912532>  ${moneyInBank[i].data}\n`;
+            }
+            const embed = new Discord.MessageEmbed()
+                .setAuthor(`${message.guild.name}'s Bank Leaderboard`, 'https://media.discordapp.net/attachments/506838906872922145/506899959816126493/h5D6Ei0.png')
+                .setColor("#7289da")
+                .setDescription(finalLb)
+                .setFooter(message.client.user.username, message.client.user.displayAvatarURL())
+                .setTimestamp()
+            message.channel.send(embed);
+        }
 
-  if(!args[0]) return message.channel.send(embed)
-
-    if (args[0] == 'coins') {
-    let money = db.startsWith(`money_${message.guild.id}`, { sort: '.data'})
-    let content = "";
-
-    for (let i = 0; i < money.length; i++) {
-        let user = bot.users.get(money[i].ID.split('_')[2]).username
-
-      
-
-        content += `${i+1}. ${user} ~ ${money[i].data}\n`
-    
-      }
-
-    const embed = new Discord.RichEmbed()
-    .setDescription(`**${message.guild.name}'s Coin Leaderboard**\n\n${content}`)
-    .setColor("#FFFFFF")
-
-    message.channel.send(embed)
-  } else if(args[0] == 'nikes') {
-    let nike = db.startsWith(`nikes_${message.guild.id}`, { sort: '.data'})
-    let content = "";
-
-    for (let i = 0; i < nike.length; i++) {
-        let user = bot.users.get(nike[i].ID.split('_')[2]).username
-
-        content += `${i+1}. ${user} ~ ${nike[i].data}\n`
     }
-
-    const embed = new Discord.RichEmbed()
-    .setDescription(`**${message.guild.name}'s Fresh Nikes Leaderboard**\n\n${content}`)
-    .setColor("#FFFFFF")
-
-    message.channel.send(embed)
-  } else if(args[0] == 'car') {
-    let cars = db.startsWith(`car_${message.guild.id}`, { sort: '.data'})
-    let content = "";
-
-    for (let i = 0; i < cars.length; i++) {
-        let user = bot.users.get(cars[i].ID.split('_')[2]).username
-
-        content += `${i+1}. ${user} ~ ${cars[i].data}\n`
-    }
-
-    const embed = new Discord.RichEmbed()
-    .setDescription(`**${message.guild.name}'s Car Leaderboard**\n\n${content}`)
-    .setColor("#FFFFFF")
-
-    message.channel.send(embed)
-  } else if(args[0] == 'mansion') {
-    let mansions = db.startsWith(`house_${message.guild.id}`, { sort: '.data'})
-    let content = "";
-
-    for (let i = 0; i < mansions.length; i++) {
-        let user = bot.users.get(mansions[i].ID.split('_')[2]).username
-
-        content += `${i+1}. ${user} ~ ${mansions[i].data}\n`
-    }
-
-    const embed = new Discord.RichEmbed()
-    .setDescription(`**${message.guild.name}'s Mansion Leaderboard**\n\n${content}`)
-    .setColor("#FFFFFF")
-
-    message.channel.send(embed)
-  }
-
-}
-module.exports.help = {
-  name:"leaderboard",
-  aliases: ["leader"]
 }

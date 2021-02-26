@@ -1,61 +1,53 @@
-const Discord = require("discord.js");
-const db = require("quick.db");
-const ms = require("parse-ms");
+const Discord = require('discord.js')
+const colors = require('../colors.json')
+const client = require('../index.js')
+const db = require('quick.db')
+const ms = require('ms')
 
-module.exports.run = async (bot, message, args) => {
-  if(!message.content.startsWith('m!'))return;  
+module.exports = {
+    name: 'with',
+    description: 'Withdraw your money',
+    usage: 'with <money>',
+    category: 'Economy',
+    guildOnly: true,
+    async execute(message, args) {
+        let User = message.mentions.users.first()
 
-  let user = message.author;
+        if (args[0] === "all") {
+            let totalCash = db.fetch(`bank_${message.guild.id}_${message.author.id}`)
+            db.add(`money_${message.guild.id}_${message.author.id}`, totalCash);
+            db.subtract(`bank_${message.guild.id}_${message.author.id}`, totalCash);
 
-  let member = db.fetch(`money_${message.guild.id}_${user.id}`)
-  let member2 = db.fetch(`bank_${message.guild.id}_${user.id}`)
+            let totalEmbed = new Discord.MessageEmbed()
+            .setAuthor(message.author.tag, message.author.avatarURL({
+                dynamic: true
+            }))
+            .setDescription(`<:check:761665701408538634> Withdrew <a:coin1:762153326430912532> ${totalCash} from your bank!`)
+            .setTimestamp()
+            .setColor("GREEN")
+        message.channel.send(totalEmbed)
 
-  if (args[0] == 'all') {
-    let money = await db.fetch(`bank_${message.guild.id}_${user.id}`)
-    
-    db.subtract(`bank_${message.guild.id}_${user.id}`, money)
-    db.add(`money_${message.guild.id}_${user.id}`, money)
-    let embed5 = new Discord.RichEmbed()
-  .setColor("#FFFFFF")
-  .setDescription(`<:Check:618736570337591296> You have withdrawn all your coins from your bank`);
-  message.channel.send(embed5)
-  
-  } else {
+        } else {
+            let amount = parseInt(args[0])
+            
+            let bankAmount = db.fetch(`bank_${message.guild.id}_${message.author.id}`)
+            if(amount > bankAmount) return message.reply("You don't have that much in your bank")
 
-  let embed2 = new Discord.RichEmbed()
-  .setColor("#FFFFFF")
-  .setDescription(`<:Cross:618736602901905418> Specify an amount to withdraw`);
-  
-  if (!args[0]) {
-      return message.channel.send(embed2)
-  }
-  let embed3 = new Discord.RichEmbed()
-  .setColor("#FFFFFF")
-  .setDescription(`<:Cross:618736602901905418> You can't withdraw negative money`);
+            db.add(`money_${message.guild.id}_${message.author.id}`, amount);
+            db.subtract(`bank_${message.guild.id}_${message.author.id}`, amount);
 
-  if (message.content.includes('-')) { 
-      return message.channel.send(embed3)
-  }
-  let embed4 = new Discord.RichEmbed()
-  .setColor("#FFFFFF")
-  .setDescription(`<:Cross:618736602901905418> You don't have that much money in the bank`);
-
-  if (member2 < args[0]) {
-      return message.channel.send(embed4)
-  }
-
-  let embed5 = new Discord.RichEmbed()
-  .setColor("#FFFFFF")
-  .setDescription(`<:Check:618736570337591296> You have withdrawn ${args[0]} coins from your bank`);
-
-  message.channel.send(embed5)
-  db.subtract(`bank_${message.guild.id}_${user.id}`, args[0])
-  db.add(`money_${message.guild.id}_${user.id}`, args[0])
-  }
-}
+            let amountEmbed = new Discord.MessageEmbed()
+            .setAuthor(message.author.tag, message.author.avatarURL({
+                dynamic: true
+            }))
+            .setDescription(`<:check:761665701408538634> Withdrew <a:coin1:762153326430912532> ${amount} from your bank!`)
+            .setTimestamp()
+            .setColor("GREEN")
+        message.channel.send(amountEmbed)
+        }
 
 
-module.exports.help = {
-  name:"withdraw",
-  aliases: ["wd"]
+        
+
+    }
 }
